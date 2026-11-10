@@ -556,7 +556,7 @@ window.I18N = (function () {
       $('#thumbs').innerHTML = thumbs(k); bindThumbs();
       showImg(k.i[0], tr(p.name) + ', ' + tr(k.n));
       var r = $('#gal').getBoundingClientRect();
-      if (r.bottom < 140) window.scrollTo({ top: window.scrollY + r.top - .offsetHeight - 8, behavior: 'smooth' });
+      if (r.bottom < 140) window.scrollTo({ top: window.scrollY + r.top - document.querySelector('.top').offsetHeight - 8, behavior: 'smooth' });
     }; });
     box.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () {
       cur.size = b.dataset.s; $('#sizes').classList.remove('err'); $('#add-msg').textContent = '';
