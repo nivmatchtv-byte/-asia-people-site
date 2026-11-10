@@ -516,6 +516,14 @@ window.I18N = (function () {
 
   /* product */
   var cur = null;
+  function thumbs(c) { return c.i.length > 1 ? c.i.map(function (s, i) { return '<button type="button" data-img="' + i + '" class="' + (i === cur.img ? 'on' : '') + '"><img src="' + s + '" alt=""></button>'; }).join('') : ''; }
+  function showImg(src, alt) {
+    var g = $('#gal'); if (!g) return;
+    var im = new Image();
+    im.onload = function () { if (g.dataset.want === src) { g.src = src; g.alt = alt; } };
+    g.dataset.want = src; im.src = src;
+    if (im.complete) { g.src = src; g.alt = alt; }
+  }
   function renderProduct(id) {
     var p = byId[id]; if (!p) { location.hash = '#catalog'; return; }
     if (!cur || cur.id !== id) cur = { id: id, c: p.d, img: 0, size: null, q: 1 };
@@ -524,7 +532,7 @@ window.I18N = (function () {
     $('#product').innerHTML =
       '<a class="crumb" href="#catalog">' + tr('← Каталог') + '</a>' +
       '<div class="prod"><div><div class="gal-main"><img id="gal" src="' + c.i[cur.img] + '" alt="' + esc(tr(p.name) + ', ' + tr(c.n)) + '"></div>' +
-      (c.i.length > 1 ? '<div class="gal-thumbs">' + c.i.map(function (s, i) { return '<button type="button" data-img="' + i + '" class="' + (i === cur.img ? 'on' : '') + '"><img src="' + s + '" alt=""></button>'; }).join('') + '</div>' : '') +
+      '<div class="gal-thumbs" id="thumbs">' + thumbs(c) + '</div>' +
       '</div><div class="pinfo"><span class="fab">' + esc(fabLine(p)) + '</span><h1>' + esc(tr(p.name)) + '</h1><p class="price">' + money(p.price) + '</p><p class="desc">' + esc(tr(p.desc)) + '</p>' +
       '<p class="lbl">' + tr('Расцветка') + ': <b>' + esc(tr(c.n)) + '</b></p><div class="sws">' +
       p.cols.map(function (k, i) { return '<button type="button" data-c="' + i + '" class="' + (i === cur.c ? 'on' : '') + '" aria-label="' + esc(tr(k.n)) + '" title="' + esc(tr(k.n)) + '"><img src="' + k.t + '" alt="" loading="lazy"></button>'; }).join('') + '</div>' +
@@ -533,10 +541,31 @@ window.I18N = (function () {
       '<div class="add"><button class="btn red block" type="button" id="add">' + tr('Добавить в корзину') + '</button><p class="add-msg" id="add-msg" role="status"></p></div></div></div>' +
       '<div class="with"><h2>' + tr('С этим носят') + '</h2><div class="grid">' + others.map(card).join('') + '</div></div>';
     var box = $('#product');
-    box.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () { cur.c = +b.dataset.c; cur.img = 0; renderProduct(id); }; });
-    box.querySelectorAll('[data-img]').forEach(function (b) { b.onclick = function () { cur.img = +b.dataset.img; renderProduct(id); }; });
-    box.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () { cur.size = b.dataset.s; renderProduct(id); }; });
-    box.querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () { cur.q = Math.max(1, Math.min(20, cur.q + +b.dataset.q)); renderProduct(id); }; });
+    function bindThumbs() {
+      box.querySelectorAll('[data-img]').forEach(function (b) { b.onclick = function () {
+        cur.img = +b.dataset.img; var k = p.cols[cur.c];
+        box.querySelectorAll('[data-img]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        showImg(k.i[cur.img], tr(p.name) + ', ' + tr(k.n));
+      }; });
+    }
+    bindThumbs();
+    box.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () {
+      cur.c = +b.dataset.c; cur.img = 0; var k = p.cols[cur.c];
+      box.querySelectorAll('[data-c]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      box.querySelector('.lbl b').textContent = tr(k.n);
+      $('#thumbs').innerHTML = thumbs(k); bindThumbs();
+      showImg(k.i[0], tr(p.name) + ', ' + tr(k.n));
+      var r = $('#gal').getBoundingClientRect();
+      if (r.bottom < 140) window.scrollTo({ top: window.scrollY + r.top - .offsetHeight - 8, behavior: 'smooth' });
+    }; });
+    box.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () {
+      cur.size = b.dataset.s; $('#sizes').classList.remove('err'); $('#add-msg').textContent = '';
+      box.querySelectorAll('[data-s]').forEach(function (x) { x.classList.toggle('on', x === b); });
+    }; });
+    box.querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () {
+      cur.q = Math.max(1, Math.min(20, cur.q + +b.dataset.q)); box.querySelector('.qty output').textContent = cur.q;
+    }; });
+    setTimeout(function () { p.cols.forEach(function (k) { (new Image()).src = k.i[0]; }); }, 300);
     $('#add').onclick = function () {
       if (!cur.size) { $('#sizes').classList.add('err'); $('#add-msg').textContent = tr('Выберите размер'); return; }
       addToCart(p.id, cur.c, cur.size, cur.q);
