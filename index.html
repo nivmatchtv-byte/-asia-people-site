@@ -141,7 +141,15 @@ p { margin: 0; }
 .crumb { display: inline-block; margin-bottom: 22px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; color: var(--muted-on-paper); }
 .crumb:hover { color: var(--red); }
 .prod { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
-.gal-main { background: var(--paper); }
+.gal-main { background: var(--paper); position: relative; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 64px; border: 0; background: rgba(242, 235, 224, .75); color: var(--ink); font-size: 34px; line-height: 1; cursor: pointer; }
+.gal-nav.prev { left: 0; } .gal-nav.next { right: 0; }
+@media (hover: hover) { .gal-nav:hover { background: var(--red); color: #fff; } }
+.gal-count { text-align: center; font-size: 13px; letter-spacing: .06em; color: var(--muted-on-paper); padding: 6px 0 2px; }
+@keyframes slideL { from { transform: translateX(28px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes slideR { from { transform: translateX(-28px); opacity: .4; } to { transform: none; opacity: 1; } }
+#gal.sl { animation: slideL .25s ease-out; } #gal.sr { animation: slideR .25s ease-out; }
+@media (prefers-reduced-motion: reduce) { #gal.sl, #gal.sr { animation: none; } }
 .gal-main img { width: 100%; max-height: 82vh; object-fit: contain; margin: 0 auto; transition: opacity .2s; }
 .gal-thumbs { display: flex; gap: 8px; margin-top: 8px; }
 .gal-thumbs button { width: 72px; aspect-ratio: 4 / 5; padding: 0; border: 2px solid transparent; background: var(--paper); cursor: pointer; }
@@ -531,7 +539,8 @@ window.I18N = (function () {
     var others = P.filter(function (o) { return o.id !== p.id && (o.cap === p.cap || o.cap === 't' || p.cap === 't'); }).slice(0, 4);
     $('#product').innerHTML =
       '<a class="crumb" href="#catalog">' + tr('← Каталог') + '</a>' +
-      '<div class="prod"><div><div class="gal-main"><img id="gal" src="' + c.i[cur.img] + '" alt="' + esc(tr(p.name) + ', ' + tr(c.n)) + '"></div>' +
+      '<div class="prod"><div><div class="gal-main" id="galbox"><img id="gal" src="' + c.i[cur.img] + '" alt="' + esc(tr(p.name) + ', ' + tr(c.n)) + '">' +
+      (p.cols.length > 1 ? '<button class="gal-nav prev" type="button" data-nav="-1" aria-label="←">‹</button><button class="gal-nav next" type="button" data-nav="1" aria-label="→">›</button><p class="gal-count" id="galcount">' + esc(tr(c.n)) + ' · ' + (cur.c + 1) + ' / ' + p.cols.length + '</p>' : '') + '</div>' +
       '<div class="gal-thumbs" id="thumbs">' + thumbs(c) + '</div>' +
       '</div><div class="pinfo"><span class="fab">' + esc(fabLine(p)) + '</span><h1>' + esc(tr(p.name)) + '</h1><p class="price">' + money(p.price) + '</p><p class="desc">' + esc(tr(p.desc)) + '</p>' +
       '<p class="lbl">' + tr('Расцветка') + ': <b>' + esc(tr(c.n)) + '</b></p><div class="sws">' +
@@ -549,15 +558,29 @@ window.I18N = (function () {
       }; });
     }
     bindThumbs();
-    box.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () {
-      cur.c = +b.dataset.c; cur.img = 0; var k = p.cols[cur.c];
-      box.querySelectorAll('[data-c]').forEach(function (x) { x.classList.toggle('on', x === b); });
+    function pick(i, fromSwatch) {
+      var n = p.cols.length; cur.c = (i + n) % n; cur.img = 0; var k = p.cols[cur.c];
+      box.querySelectorAll('[data-c]').forEach(function (x) { x.classList.toggle('on', +x.dataset.c === cur.c); });
       box.querySelector('.lbl b').textContent = tr(k.n);
+      var gc = $('#galcount'); if (gc) gc.textContent = tr(k.n) + ' · ' + (cur.c + 1) + ' / ' + n;
       $('#thumbs').innerHTML = thumbs(k); bindThumbs();
       showImg(k.i[0], tr(p.name) + ', ' + tr(k.n));
-      var r = $('#gal').getBoundingClientRect();
-      if (r.bottom < 140) window.scrollTo({ top: window.scrollY + r.top - document.querySelector('.top').offsetHeight - 8, behavior: 'smooth' });
-    }; });
+      if (fromSwatch) {
+        var r = $('#gal').getBoundingClientRect();
+        if (r.bottom < 140) window.scrollTo({ top: window.scrollY + r.top - document.querySelector('.top').offsetHeight - 8, behavior: 'smooth' });
+      }
+    }
+    box.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () { pick(+b.dataset.c, true); }; });
+    box.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () { pick(cur.c + +b.dataset.nav); }; });
+    var gb = $('#galbox'), sx = null, sy = 0;
+    gb.addEventListener('touchstart', function (e) { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } }, { passive: true });
+    gb.addEventListener('touchend', function (e) {
+      if (sx === null) return; var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; sx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2 && p.cols.length > 1) {
+        var g = $('#gal'); g.classList.remove('sl', 'sr'); void g.offsetWidth; g.classList.add(dx < 0 ? 'sl' : 'sr');
+        pick(cur.c + (dx < 0 ? 1 : -1));
+      }
+    }, { passive: true });
     box.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () {
       cur.size = b.dataset.s; $('#sizes').classList.remove('err'); $('#add-msg').textContent = '';
       box.querySelectorAll('[data-s]').forEach(function (x) { x.classList.toggle('on', x === b); });
