@@ -8,7 +8,7 @@
 <link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800;900&family=Golos+Text:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&family=Golos+Text:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&text=%E4%BA%BA&display=swap">
 <style>
 :root {
@@ -16,7 +16,7 @@
   --paper: #f2ebe0; --paper-2: #faf6ef; --paper-line: #d9cfc1;
   --red: #c41e2a; --red-soft: #e2464f;
   --muted-on-ink: #b9ada3; --muted-on-paper: #6b5f57;
-  --display: "Inter Tight", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --display: "Cormorant", Georgia, serif;
   --body: "Golos Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --brush: "Yuji Syuku", "Noto Serif CJK JP", "Hiragino Mincho ProN", serif;
   --wrap: 1180px;
@@ -206,6 +206,11 @@ p { margin: 0; }
 .msg { display: flex; gap: 12px; flex-wrap: wrap; }
 .foot .small { color: var(--muted-on-ink); font-size: 13px; margin-top: 30px; }
 @media (max-width: 760px) { .foot .wrap { grid-template-columns: 1fr; } }
+
+/* display font: Cormorant reads best at semibold with slight tracking */
+h1, h2, h3, .wordmark, .pillar .no, .card strong, .pinfo .price, .total, .line strong { font-weight: 600 !important; letter-spacing: 0.01em !important; }
+h1 { line-height: 1.02; }
+.wordmark { letter-spacing: .08em !important; }
 
 /* cart drawer */
 .scrim { position: fixed; inset: 0; background: rgba(20, 17, 17, .55); z-index: 40; }
