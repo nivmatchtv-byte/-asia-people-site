@@ -95,11 +95,27 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .looks-row { animation: none; } .looks.dual .looks-track { overflow-x: auto; } }
 @keyframes looksrun { to { transform: translateX(-50%); } }
 
+/* video hero */
+.vhero { position: relative; background: var(--ink); height: calc(100svh - 92px); min-height: 420px; max-height: 900px; overflow: hidden; }
+.vhero video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vhero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(20, 17, 17, .65), rgba(20, 17, 17, 0) 45%); pointer-events: none; }
+.vhero-copy { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; max-width: var(--wrap); margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-left, 0px)) clamp(28px, 5vw, 56px); color: var(--paper); display: flex; justify-content: space-between; align-items: end; gap: 20px; flex-wrap: wrap; }
+.vhero-copy h1 { font-size: clamp(34px, 6vw, 80px); max-width: 760px; }
+@media (min-width: 761px) { .vhero { height: calc(100svh - 60px); } }
+@media (max-width: 760px) {
+  .vhero { height: auto; min-height: 0; }
+  .vhero video { height: auto; aspect-ratio: 16 / 9; }
+  .vhero::after { display: none; }
+  .vhero-copy { position: static; padding-top: 22px; padding-bottom: 30px; }
+}
+
 /* hero */
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: end; }
 .hero .lede { font-size: clamp(17px, 1.6vw, 20px); color: var(--muted-on-ink); max-width: 560px; }
 .hero .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
 @media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; gap: 20px; } }
+
+.view[data-view="about"] .looks { padding-bottom: 10px; }
 
 /* pillars */
 .pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -260,6 +276,55 @@ h1 { line-height: 1.02; }
 
 <main>
 <div class="view" data-view="home">
+<section class="vhero" aria-label="Asia People">
+  <video id="hero-video" src="img/hero.mp4" poster="img/hero-poster.jpg" autoplay muted loop playsinline preload="auto"></video>
+  <div class="vhero-copy">
+    <h1>Одежда для жизни и путешествий</h1>
+    <a class="btn red" href="#catalog">Каталог</a>
+  </div>
+</section>
+
+<section class="band white" id="catalog">
+  <div class="wrap">
+    <div class="cat-head">
+      <div><p class="eyebrow">Каталог</p><h2>Коллекция</h2></div>
+      <div class="chips" role="group" aria-label="Каталог">
+        <button class="chip" type="button" data-f="all" aria-pressed="true">Всё</button>
+        <button class="chip" type="button" data-f="w" aria-pressed="false">Женское</button>
+        <button class="chip" type="button" data-f="m" aria-pressed="false">Мужское</button>
+        <button class="chip" type="button" data-f="k" aria-pressed="false">Кимоно</button>
+      </div>
+    </div>
+    <div class="grid" id="grid" data-dyn></div>
+  </div>
+</section>
+</div>
+
+<div class="view" data-view="product" hidden>
+<section class="band">
+  <div class="wrap" id="product" data-dyn></div>
+</section>
+</div>
+
+<div class="view" data-view="about" hidden>
+<section class="band brand">
+  <div class="wrap">
+    <div class="brand-top">
+      <div>
+        <p class="eyebrow">О бренде</p>
+        <h2>Что такое Asia People</h2>
+      </div>
+      <div class="brand-copy">
+        <p>Это одежда для тех, кто работает из любой точки мира, летает между городами и не откладывает жизнь на потом. Эти люди умеют зарабатывать деньги и тратить их с удовольствием. Шёлк, шифон и хлопок, азиатские принты и вьетнамское производство. Вещи помещаются в один чемодан и собираются в десятки образов: в них можно провести переговоры, сесть в самолёт и пойти на ужин у моря. Выглядеть статусно и чувствовать себя удобно.</p><p>Я хочу объединить мужчин и женщин, которые любят жизнь, ценят себя и не боятся перемен. В любом возрасте.</p><p class="about-q">Иногда новая жизнь начинается с одного чемодана. И с кимоно, в котором хочется её начать.</p>
+      </div>
+    </div>
+    <div class="brand-pics">
+      <img src="img/look-09.jpg" alt="Образ Asia People" width="900" height="1328" loading="lazy">
+      <img src="img/look-22.jpg" alt="Образ Asia People" width="900" height="1125" loading="lazy">
+      <img src="img/look-36.jpg" alt="Образ Asia People" width="900" height="1350" loading="lazy">
+    </div>
+  </div>
+</section>
 <section class="looks" aria-label="Образы коллекции">
   <div class="looks-track" id="looks-track">
     <img data-row="0" src="img/look-26.jpg" alt="Образ Asia People" width="900" height="1125" loading="eager">
@@ -310,19 +375,6 @@ h1 { line-height: 1.02; }
     <img data-row="2" src="img/look-17.jpg" alt="Образ Asia People" width="788" height="1400" loading="lazy">
   </div>
 </section>
-<section class="band ink hero">
-  <div class="wrap">
-    <div>
-      <p class="eyebrow">Шёлк, шифон и хлопок · сшито в Дананге</p>
-      <h1>Одежда для жизни и путешествий</h1>
-    </div>
-    <div>
-      <p class="lede">Кимоно, платья, костюмы и шорты с азиатскими принтами. Все вещи сочетаются между собой: в них можно провести переговоры, сесть в самолёт и пойти на ужин у моря.</p>
-      <div class="cta"><a class="btn red" href="#catalog" data-filter="w">Женское</a><a class="btn" href="#catalog" data-filter="m">Мужское</a></div>
-    </div>
-  </div>
-</section>
-
 <section class="band">
   <div class="wrap">
     <div class="pillars">
@@ -332,22 +384,16 @@ h1 { line-height: 1.02; }
     </div>
   </div>
 </section>
-
-<section class="band white" id="catalog">
-  <div class="wrap">
-    <div class="cat-head">
-      <div><p class="eyebrow">Каталог</p><h2>Коллекция</h2></div>
-      <div class="chips" role="group" aria-label="Каталог">
-        <button class="chip" type="button" data-f="all" aria-pressed="true">Всё</button>
-        <button class="chip" type="button" data-f="w" aria-pressed="false">Женское</button>
-        <button class="chip" type="button" data-f="m" aria-pressed="false">Мужское</button>
-        <button class="chip" type="button" data-f="k" aria-pressed="false">Кимоно</button>
-      </div>
+<section class="band ink">
+  <div class="wrap about">
+    <figure class="about-photo"><img src="ceo2.jpg" alt="Ирина Носова" width="900" height="1200" loading="lazy"><figcaption>Ирина Носова, основатель Asia People</figcaption></figure>
+    <div class="about-copy">
+      <p class="eyebrow">Основатель бренда</p>
+      <h2>Ирина Носова</h2>
+      <p>Меня зовут Ирина Носова. Я CEO и креативный директор Asia People.</p><p>Много лет я работала на российском федеральном телевидении. Была шеф-редактором «Модного приговора» и YouTube-канала Ксении Собчак, снимала документальные фильмы, большие развлекательные шоу и тревел-проекты со звёздами, политиками и инфлюенсерами, а также делала подкаст об экономике.</p><p>Я знакома с ведущими стилистами, дизайнерами и основателями крупных модных брендов и знаю индустрию изнутри. И я давно поняла, что одежда меняет не только внешность, но и то, как человек себя чувствует.</p><h3 class="about-h">Опыт в моде и пошиве</h3><p>Я давно шью одежду для себя и близких, а в Дананге открыла ателье Sisters’ Dresses: индивидуальный пошив по меркам и подбор гардероба для клиентов из разных стран. У ателье свой сайт на трёх языках с онлайн-приёмом мерок, налаженная работа с местными цехами и поставщиками тканей. Asia People вырастает из этого работающего дела.</p>
     </div>
-    <div class="grid" id="grid" data-dyn></div>
   </div>
 </section>
-
 <section class="band ink" id="how">
   <div class="wrap">
     <p class="eyebrow">Как заказать</p>
@@ -360,43 +406,6 @@ h1 { line-height: 1.02; }
     <div class="info2">
       <div><h3>Размеры</h3><p>Женские модели: S, M–L, XL. Мужские модели: S, M–L, XL–XXL. Сомневаетесь в размере? Напишите нам, подскажем.</p></div>
       <div><h3>Ателье</h3><p>Нужна посадка точно по фигуре? Сошьём любую модель по вашим меркам в нашем ателье <a href="https://sistersdresses.club" target="_blank" rel="noopener">Sisters’ Dresses</a>.</p></div>
-    </div>
-  </div>
-</section>
-</div>
-
-<div class="view" data-view="product" hidden>
-<section class="band">
-  <div class="wrap" id="product" data-dyn></div>
-</section>
-</div>
-
-<div class="view" data-view="about" hidden>
-<section class="band brand">
-  <div class="wrap">
-    <div class="brand-top">
-      <div>
-        <p class="eyebrow">О бренде</p>
-        <h2>Что такое Asia People</h2>
-      </div>
-      <div class="brand-copy">
-        <p>Это одежда для тех, кто работает из любой точки мира, летает между городами и не откладывает жизнь на потом. Эти люди умеют зарабатывать деньги и тратить их с удовольствием. Шёлк, шифон и хлопок, азиатские принты и вьетнамское производство. Вещи помещаются в один чемодан и собираются в десятки образов: в них можно провести переговоры, сесть в самолёт и пойти на ужин у моря. Выглядеть статусно и чувствовать себя удобно.</p><p>Я хочу объединить мужчин и женщин, которые любят жизнь, ценят себя и не боятся перемен. В любом возрасте.</p><p class="about-q">Иногда новая жизнь начинается с одного чемодана. И с кимоно, в котором хочется её начать.</p>
-      </div>
-    </div>
-    <div class="brand-pics">
-      <img src="img/look-09.jpg" alt="Образ Asia People" width="900" height="1328" loading="lazy">
-      <img src="img/look-22.jpg" alt="Образ Asia People" width="900" height="1125" loading="lazy">
-      <img src="img/look-36.jpg" alt="Образ Asia People" width="900" height="1350" loading="lazy">
-    </div>
-  </div>
-</section>
-<section class="band ink">
-  <div class="wrap about">
-    <figure class="about-photo"><img src="ceo2.jpg" alt="Ирина Носова" width="900" height="1200" loading="lazy"><figcaption>Ирина Носова, основатель Asia People</figcaption></figure>
-    <div class="about-copy">
-      <p class="eyebrow">Основатель бренда</p>
-      <h2>Ирина Носова</h2>
-      <p>Меня зовут Ирина Носова. Я CEO и креативный директор Asia People.</p><p>Много лет я работала на российском федеральном телевидении. Была шеф-редактором «Модного приговора» и YouTube-канала Ксении Собчак, снимала документальные фильмы, большие развлекательные шоу и тревел-проекты со звёздами, политиками и инфлюенсерами, а также делала подкаст об экономике.</p><p>Я знакома с ведущими стилистами, дизайнерами и основателями крупных модных брендов и знаю индустрию изнутри. И я давно поняла, что одежда меняет не только внешность, но и то, как человек себя чувствует.</p><h3 class="about-h">Опыт в моде и пошиве</h3><p>Я давно шью одежду для себя и близких, а в Дананге открыла ателье Sisters’ Dresses: индивидуальный пошив по меркам и подбор гардероба для клиентов из разных стран. У ателье свой сайт на трёх языках с онлайн-приёмом мерок, налаженная работа с местными цехами и поставщиками тканей. Asia People вырастает из этого работающего дела.</p>
     </div>
   </div>
 </section>
@@ -669,6 +678,10 @@ window.I18N = (function () {
     else if (target) target.scrollIntoView();
     else window.scrollTo(0, 0);
   }
+  var hv = document.getElementById('hero-video');
+  function playHero() { if (hv && !hv.closest('[hidden]')) { hv.muted = true; var r = hv.play(); if (r && r.catch) r.catch(function () {}); } }
+  ['touchstart', 'click', 'scroll'].forEach(function (ev) { window.addEventListener(ev, playHero, { once: true, passive: true }); });
+  window.addEventListener('hashchange', function () { setTimeout(playHero, 50); });
   window.addEventListener('hashchange', route);
   I18N.on(function () { renderGrid(); renderCart(); if (!$('[data-view="product"]').hidden) renderProduct(cur.id); });
   I18N.init();
